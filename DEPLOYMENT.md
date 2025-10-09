@@ -15,7 +15,7 @@ Follow these steps to publish your MarketIn SDK to GitHub and make it available 
 
 ```bash
 # Add your GitHub repository as remote (replace with your username)
-git remote add origin https://github.com/ayg3/marketin-sdk.git
+git remote add origin https://github.com/ayg3/sdk.git
 
 # Push to GitHub
 git branch -M main
@@ -46,17 +46,17 @@ Once published, your SDK will be available via jsDelivr:
 
 **Latest version (auto-updates):**
 ```html
-<script src="https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk@latest/marketin-sdk.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ayg3/sdk@latest/marketin-sdk.min.js"></script>
 ```
 
 **Specific version (recommended for production):**
 ```html
-<script src="https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk@1.0.1/marketin-sdk.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ayg3/sdk@1.0.1/marketin-sdk.min.js"></script>
 ```
 
 **Development version (always latest commit):**
 ```html
-<script src="https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk/marketin-sdk.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ayg3/sdk/marketin-sdk.min.js"></script>
 ```
 
 ### 5. Update Package.json
@@ -67,12 +67,12 @@ Before publishing, update the repository URLs in `package.json`:
 {
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ayg3/marketin-sdk.git"
+    "url": "git+https://github.com/ayg3/sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/ayg3/marketin-sdk/issues"
+    "url": "https://github.com/ayg3/sdk/issues"
   },
-  "homepage": "https://github.com/ayg3/marketin-sdk#readme"
+  "homepage": "https://github.com/ayg3/sdk#readme"
 }
 ```
 
@@ -85,9 +85,9 @@ Update the badges and URLs in README.md with your actual GitHub username.
 After pushing and creating a release:
 
 1. Wait 5-10 minutes for jsDelivr to update
-2. Visit: `https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk@1.0.1/`
+2. Visit: `https://cdn.jsdelivr.net/gh/ayg3/sdk@1.0.1/`
 3. You should see your files listed
-4. Test the direct URL: `https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk@1.0.1/marketin-sdk.min.js`
+4. Test the direct URL: `https://cdn.jsdelivr.net/gh/ayg3/sdk@1.0.1/marketin-sdk.min.js`
 
 ## NPM Publishing (Optional)
 
@@ -115,7 +115,7 @@ npm publish
     <!-- Your content -->
     
     <!-- MarketIn SDK -->
-    <script src="https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk@1.0.1/marketin-sdk.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ayg3/sdk@1.0.1/marketin-sdk.min.js"></script>
     <script>
         // Initialize SDK
         MarketIn.init({
@@ -144,7 +144,7 @@ Add to your theme's `functions.php`:
 ```php
 function add_marketin_sdk() {
     ?>
-    <script src="https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk@1.0.1/marketin-sdk.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ayg3/sdk@1.0.1/marketin-sdk.min.js"></script>
     <script>
         MarketIn.init({
             brandId: '<?php echo get_option('marketin_brand_id'); ?>',
@@ -161,7 +161,7 @@ add_action('wp_footer', 'add_marketin_sdk');
 Add to your theme's `theme.liquid` before `</body>`:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/ayg3/marketin-sdk@1.0.1/marketin-sdk.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ayg3/sdk@1.0.1/marketin-sdk.min.js"></script>
 <script>
     MarketIn.init({
         brandId: 'your-brand-id',
@@ -217,7 +217,7 @@ git push origin v1.0.2
 ### Track SDK Usage
 
 Monitor your SDK usage through:
-1. jsDelivr statistics: `https://www.jsdelivr.com/package/gh/ayg3/marketin-sdk`
+1. jsDelivr statistics: `https://www.jsdelivr.com/package/gh/ayg3/sdk`
 2. GitHub repository insights
 3. API endpoint analytics
 

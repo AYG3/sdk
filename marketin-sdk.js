@@ -2,7 +2,7 @@
  * MarketIn SDK
  * A JavaScript SDK for tracking website activities and affiliate links
  * Version: 1.0.1
- * GitHub: https://github.com/ayg3/marketin-sdk
+ * GitHub: https://github.com/ayg3/sdk
  */
 
 (function(window) {

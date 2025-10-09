@@ -3,7 +3,7 @@
 A lightweight JavaScript SDK for tracking website activities, affiliate links, and conversions.
 
 [![Version](https://img.shields.io/npm/v/marketin-sdk.svg)](https://npmjs.org/package/marketin-sdk)
-[![jsDelivr](https://data.jsdelivr.com/v1/package/gh/yourusername/marketin-sdk/badge)](https://www.jsdelivr.com/package/gh/yourusername/marketin-sdk)
+[![jsDelivr](https://data.jsdelivr.com/v1/package/gh/ayg3/sdk/badge)](https://www.jsdelivr.com/package/gh/ayg3/sdk)
 
 ## Features
 
@@ -22,10 +22,10 @@ A lightweight JavaScript SDK for tracking website activities, affiliate links, a
 
 ```html
 <!-- Latest version -->
-<script src="https://cdn.jsdelivr.net/gh/yourusername/marketin-sdk@latest/marketin-sdk.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ayg3/sdk@latest/marketin-sdk.min.js"></script>
 
 <!-- Specific version -->
-<script src="https://cdn.jsdelivr.net/gh/yourusername/marketin-sdk@1.0.1/marketin-sdk.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ayg3/sdk@1.0.1/marketin-sdk.min.js"></script>
 ```
 
 ### Via NPM
@@ -241,8 +241,8 @@ The SDK includes comprehensive error handling:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/marketin-sdk.git
-cd marketin-sdk
+git clone https://github.com/ayg3/sdk.git
+cd sdk
 
 # No build process required - edit the source files directly
 ```
@@ -272,7 +272,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 📧 Email: support@marketin.now
 - 📖 Documentation: [https://docs.marketin.now](https://docs.marketin.now)
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/marketin-sdk/issues)
+- 🐛 Issues: [GitHub Issues](https://github.com/ayg3/sdk/issues)
 
 ---
 

@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ayg3/marketin-sdk.git"
+    "url": "git+https://github.com/ayg3/sdk.git"
   },
   "keywords": [
     "affiliate",
@@ -25,12 +25,12 @@
     "sdk",
     "javascript"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Your Name <gilbertayoku3@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ayg3/marketin-sdk/issues"
+    "url": "https://github.com/ayg3/sdk/issues"
   },
-  "homepage": "https://github.com/ayg3/marketin-sdk#readme",
+  "homepage": "https://github.com/ayg3/sdk#readme",
   "engines": {
     "node": ">=12.0.0"
   }
