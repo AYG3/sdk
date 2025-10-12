@@ -144,6 +144,28 @@ MarketIn.trackConversion({
 })
 ```
 
+### Tracking Purchases and Subscriptions
+
+MarketIn provides built-in helpers so you don’t need to wire anything manually:
+
+```javascript
+// Purchase helper
+MarketIn.handleTrackConversion({
+    productId: 'sku-123',
+    value: 99.99,
+    currency: 'NGN'
+});
+
+// Subscription helper
+MarketIn.handleSubscriptionSubmit({
+    eventType: 'subscription_started',
+    recurringAmount: 500,
+    currency: 'NGN'
+});
+```
+
+Both helpers delegate to `MarketIn.trackConversion()` — make sure your integration has already established `campaignId` and `affiliateId` (via URL parameters or by passing them during `MarketIn.init`) so conversions can be attributed correctly.
+
 ### Page Data Crawling
 
 ```javascript

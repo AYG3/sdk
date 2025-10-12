@@ -204,7 +204,8 @@
             try {
                 const url = `${config.apiEndpoint}/${endpoint}/`;
                 const headers = {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/javascript',
+                    'X-Content-Type-Options': 'nosniff',
                     'X-MarketIn-SDK': '1.0.1'
                 };
 
