@@ -100,6 +100,11 @@
             
 
             utils.log('SDK initialized');
+            try {
+                console.log('[MarketIn SDK] init: success');
+            } catch (e) {
+                console.error('[MarketIn SDK] init: error', e && e.message ? e.message : e);
+            }
         },
 
         /**
@@ -138,6 +143,11 @@
             };
             console.log("log activity data", data)
             MarketIn.sendToAPI('log-activity', data);
+            try {
+                console.log('[MarketIn SDK] trackPageView: queued', data);
+            } catch (e) {
+                console.error('[MarketIn SDK] trackPageView: error', e && e.message ? e.message : e);
+            }
         },
 
         /**
@@ -194,8 +204,10 @@
                 console.log("affiliate click data from sdk:", data)
                 MarketIn.sendToAPI('log-affiliate-click', data);
                 utils.log(`Affiliate click tracked: ${affiliateId}`);
+                console.log('[MarketIn SDK] trackAffiliateClick: queued', data);
             } catch (error) {
                 utils.log(`Failed to track affiliate click: ${error.message}`);
+                console.error('[MarketIn SDK] trackAffiliateClick: error', error && error.message ? error.message : error);
             }
         },
 
@@ -228,16 +240,21 @@
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-                    return response.json();
+                    return response.json().catch(() => null);
                 })
-                .then(response => {
-                    utils.log(`API Success: ${JSON.stringify(response)}`);
+                .then(responseBody => {
+                    utils.log(`API Success: ${JSON.stringify(responseBody)}`);
+                    try {
+                        console.log('[MarketIn SDK] sendToAPI: success', { endpoint, data, response: responseBody });
+                    } catch (e) {
+                        console.log('[MarketIn SDK] sendToAPI: success');
+                    }
+                    return responseBody;
                 })
                 .catch(error => {
                     utils.log(`API Error: ${error.message}`);
+                    console.error('[MarketIn SDK] sendToAPI: error', error && error.message ? error.message : error);
                 });
-                
-                console.log("Marketin Server SDK API Success:", response);
             } catch (error) {
                 utils.log(`Failed to send API request: ${error.message}`);
             }
@@ -269,10 +286,15 @@
                 }
 
                 MarketIn.sendToAPI('crawl-data', data);
+                try {
+                    console.log('[MarketIn SDK] crawlPageData: queued', { url: data.url, products: data.products.length });
+                } catch (e) {
+                    console.log('[MarketIn SDK] crawlPageData: queued');
+                }
                 
             } catch (error) {
                 utils.log(`Failed to crawl page data: ${error.message}`);
-                console.log(`Failed to crawl page data: ${error.message}`);
+                console.error('[MarketIn SDK] crawlPageData: error', error && error.message ? error.message : error);
             }
         },
 
@@ -332,9 +354,14 @@
                 MarketIn.sendToAPI(conversionEndpoint, payload);
                 window.localStorage.setItem(dedupeKey, payload.conversionRef);
                 utils.log(`Conversion tracked: ${eventType} ${value} ${currency}`);
-                console.log(`Conversion tracked: ${eventType} ${value} ${currency}`);
+                try {
+                    console.log('[MarketIn SDK] trackConversion: queued', payload);
+                } catch (e) {
+                    console.log('[MarketIn SDK] trackConversion: queued');
+                }
             } catch (error) {
                 utils.log(`Failed to track conversion: ${error.message}`);
+                console.error('[MarketIn SDK] trackConversion: error', error && error.message ? error.message : error);
             }
         },
 
