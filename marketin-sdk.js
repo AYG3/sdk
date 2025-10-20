@@ -237,6 +237,7 @@
                     utils.log(`API Error: ${error.message}`);
                 });
                 
+                console.log("API Success:", response);
             } catch (error) {
                 utils.log(`Failed to send API request: ${error.message}`);
             }
@@ -271,6 +272,7 @@
                 
             } catch (error) {
                 utils.log(`Failed to crawl page data: ${error.message}`);
+                console.log(`Failed to crawl page data: ${error.message}`);
             }
         },
 
@@ -330,6 +332,7 @@
                 MarketIn.sendToAPI(conversionEndpoint, payload);
                 window.localStorage.setItem(dedupeKey, payload.conversionRef);
                 utils.log(`Conversion tracked: ${eventType} ${value} ${currency}`);
+                console.log(`Conversion tracked: ${eventType} ${value} ${currency}`);
             } catch (error) {
                 utils.log(`Failed to track conversion: ${error.message}`);
             }
