@@ -237,7 +237,7 @@
                     utils.log(`API Error: ${error.message}`);
                 });
                 
-                console.log("API Success:", response);
+                console.log("Marketin Server SDK API Success:", response);
             } catch (error) {
                 utils.log(`Failed to send API request: ${error.message}`);
             }
