@@ -1,8 +1,6 @@
 /**
  * MarketIn SDK
  * A JavaScript SDK for tracking website activities and affiliate links
- * Version: 1.0.1
- * GitHub: https://github.com/ayg3/sdk
  */
 
 (function(window) {
@@ -100,11 +98,6 @@
             
 
             utils.log('SDK initialized');
-            try {
-                console.log('[MarketIn SDK] init: success');
-            } catch (e) {
-                console.error('[MarketIn SDK] init: error', e && e.message ? e.message : e);
-            }
         },
 
         /**
@@ -143,11 +136,6 @@
             };
             console.log("log activity data", data)
             MarketIn.sendToAPI('log-activity', data);
-            try {
-                console.log('[MarketIn SDK] trackPageView: queued', data);
-            } catch (e) {
-                console.error('[MarketIn SDK] trackPageView: error', e && e.message ? e.message : e);
-            }
         },
 
         /**
@@ -204,10 +192,8 @@
                 console.log("affiliate click data from sdk:", data)
                 MarketIn.sendToAPI('log-affiliate-click', data);
                 utils.log(`Affiliate click tracked: ${affiliateId}`);
-                console.log('[MarketIn SDK] trackAffiliateClick: queued', data);
             } catch (error) {
                 utils.log(`Failed to track affiliate click: ${error.message}`);
-                console.error('[MarketIn SDK] trackAffiliateClick: error', error && error.message ? error.message : error);
             }
         },
 
@@ -240,21 +226,16 @@
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-                    return response.json().catch(() => null);
+                    return response.json();
                 })
-                .then(responseBody => {
-                    utils.log(`API Success: ${JSON.stringify(responseBody)}`);
-                    try {
-                        console.log('[MarketIn SDK] sendToAPI: success', { endpoint, data, response: responseBody });
-                    } catch (e) {
-                        console.log('[MarketIn SDK] sendToAPI: success');
-                    }
-                    return responseBody;
+                .then(response => {
+                    utils.log(`API Success: ${JSON.stringify(response)}`);
                 })
                 .catch(error => {
                     utils.log(`API Error: ${error.message}`);
-                    console.error('[MarketIn SDK] sendToAPI: error', error && error.message ? error.message : error);
                 });
+                
+                console.log("Marketin Server SDK API Success:", response);
             } catch (error) {
                 utils.log(`Failed to send API request: ${error.message}`);
             }
@@ -286,20 +267,15 @@
                 }
 
                 MarketIn.sendToAPI('crawl-data', data);
-                try {
-                    console.log('[MarketIn SDK] crawlPageData: queued', { url: data.url, products: data.products.length });
-                } catch (e) {
-                    console.log('[MarketIn SDK] crawlPageData: queued');
-                }
                 
             } catch (error) {
                 utils.log(`Failed to crawl page data: ${error.message}`);
-                console.error('[MarketIn SDK] crawlPageData: error', error && error.message ? error.message : error);
+                console.log(`Failed to crawl page data: ${error.message}`);
             }
         },
 
         // Track a conversion event and attribute to affiliate via tracking IDs
-        trackConversion: ({ eventType, value = 0, currency = 'USD', conversionRef, productId, metadata = {}, subscriptionId, periodNumber, planId, interval, recurringAmount, subscriptionStatus } = {}) => {
+        trackConversion: ({ eventType, value, currency = 'USD', conversionRef, productId, cartItems, metadata = {}, subscriptionId, periodNumber, planId, interval, recurringAmount, subscriptionStatus } = {}) => {
             try {
                 if (!config.campaignId || !config.affiliateId) {
                     utils.log('Conversion skipped: missing campaignId or affiliateId');
@@ -307,7 +283,9 @@
                 }
 
                 const isSubscription = typeof eventType === 'string' && eventType.startsWith('subscription');
-                if (!isSubscription && !productId) {
+                const normalizedCartItems = Array.isArray(cartItems) ? cartItems.filter((item) => item && typeof item === 'object') : [];
+
+                if (!isSubscription && !productId && normalizedCartItems.length === 0) {
                     utils.log('Conversion aborted: productId is required for non-subscription events');
                     return;
                 }
@@ -321,19 +299,71 @@
                 }
 
                 // Default productId from URL if not provided
-                const resolvedProductId = productId || utils.getQueryParam('pid') || utils.getQueryParam('product_id');
+                const resolvedProductId = productId
+                    || (normalizedCartItems.length > 0 ? normalizedCartItems[0].productId || normalizedCartItems[0].product_id : undefined)
+                    || utils.getQueryParam('pid')
+                    || utils.getQueryParam('product_id');
+
+                const toNumber = (val, fallback = 0) => {
+                    if (val === undefined || val === null || val === '') {
+                        return fallback;
+                    }
+                    const parsed = typeof val === 'string' ? parseFloat(val) : Number(val);
+                    return Number.isFinite(parsed) ? parsed : fallback;
+                };
+
+                const computedCartTotal = normalizedCartItems.length
+                    ? normalizedCartItems.reduce((total, item) => {
+                        const price = toNumber(item.price);
+                        const quantity = toNumber(item.quantity, 1) || 1;
+                        return total + price * quantity;
+                    }, 0)
+                    : null;
+
+                const providedValue = toNumber(value, 0);
+                const finalValue = computedCartTotal !== null && computedCartTotal > 0 ? computedCartTotal : providedValue;
+
+                const sanitizeCartItems = () => {
+                    if (normalizedCartItems.length === 0) {
+                        return undefined;
+                    }
+                    return normalizedCartItems.map((item) => {
+                        const sanitized = Object.assign({}, item);
+                        if (sanitized.productId === undefined && sanitized.product_id !== undefined) {
+                            sanitized.productId = sanitized.product_id;
+                        }
+                        if (sanitized.affiliateId === undefined && sanitized.affiliate_id !== undefined) {
+                            sanitized.affiliateId = sanitized.affiliate_id;
+                        }
+                        if (sanitized.campaignId === undefined && sanitized.campaign_id !== undefined) {
+                            sanitized.campaignId = sanitized.campaign_id;
+                        }
+                        if (sanitized.quantity === undefined) {
+                            sanitized.quantity = 1;
+                        }
+                        sanitized.productId = sanitized.productId !== undefined ? sanitized.productId : resolvedProductId;
+                        delete sanitized.product_id;
+                        delete sanitized.affiliate_id;
+                        delete sanitized.campaign_id;
+                        return sanitized;
+                    });
+                };
 
                 const payload = {
                     campaignId: parseInt(config.campaignId),
                     affiliateId: parseInt(config.affiliateId),
                     sessionId: config.sessionId,
                     eventType,
-                    value,
+                    value: Number.isFinite(finalValue) ? Number(finalValue.toFixed(2)) : 0,
                     currency,
                     conversionRef: conversionRef || utils.generateUUID()
                 };
                 // attach productId if provided (required by server)
                 if (resolvedProductId) payload.productId = resolvedProductId;
+                const cartItemsPayload = sanitizeCartItems();
+                if (cartItemsPayload) {
+                    payload.cartItems = cartItemsPayload;
+                }
                 // Subscription helper: map high-level args into metadata for backend
                 if (eventType && eventType.startsWith('subscription')) {
                     payload.metadata = Object.assign({}, metadata, {
@@ -353,15 +383,10 @@
 
                 MarketIn.sendToAPI(conversionEndpoint, payload);
                 window.localStorage.setItem(dedupeKey, payload.conversionRef);
-                utils.log(`Conversion tracked: ${eventType} ${value} ${currency}`);
-                try {
-                    console.log('[MarketIn SDK] trackConversion: queued', payload);
-                } catch (e) {
-                    console.log('[MarketIn SDK] trackConversion: queued');
-                }
+                utils.log(`Conversion tracked: ${eventType} ${payload.value} ${currency}`);
+                console.log(`Conversion tracked: ${eventType} ${payload.value} ${currency}`);
             } catch (error) {
                 utils.log(`Failed to track conversion: ${error.message}`);
-                console.error('[MarketIn SDK] trackConversion: error', error && error.message ? error.message : error);
             }
         },
 
