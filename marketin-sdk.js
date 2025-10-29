@@ -9,7 +9,6 @@
     // Configuration
     const config = {
         apiEndpoint: 'https://api.marketin.now/api/v1/',
-        // apiEndpoint: 'http://localhost:8000/api/v1',
         debug: true,
         sessionId: null,
         affiliateId: null,
@@ -54,6 +53,72 @@
             return null;
         },
 
+        // Referral storage utility (hybrid cookie + localStorage)
+        REFERRAL_KEY: 'marketin_referral',
+        COOKIE_MAX_AGE: 60 * 60 * 24 * 30, // 30 days
+
+        saveReferralParams: (params = {}) => {
+            const encoded = JSON.stringify(params);
+            try {
+                const maxAge = utils.COOKIE_MAX_AGE;
+                document.cookie = `${utils.REFERRAL_KEY}=${encodeURIComponent(encoded)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+                if (window.location.protocol === 'https:') {
+                    document.cookie += '; Secure';
+                }
+                localStorage.setItem(utils.REFERRAL_KEY, encoded);
+            } catch (err) {
+                utils.log('Failed to save referral params: ' + err.message);
+            }
+        },
+
+        getReferralParams: () => {
+            let data = null;
+            try {
+                const cookieMatch = document.cookie.match(new RegExp('(^| )' + utils.REFERRAL_KEY + '=([^;]+)'));
+                if (cookieMatch) {
+                    data = JSON.parse(decodeURIComponent(cookieMatch[2]));
+                }
+            } catch (err) {}
+            if (!data) {
+                try {
+                    data = JSON.parse(localStorage.getItem(utils.REFERRAL_KEY));
+                } catch (err) {}
+            }
+            return data || {};
+        },
+
+        clearReferralParams: () => {
+            try {
+                document.cookie = `${utils.REFERRAL_KEY}=; Max-Age=0; path=/;`;
+                localStorage.removeItem(utils.REFERRAL_KEY);
+            } catch (err) {
+                utils.log('Failed to clear referral params: ' + err.message);
+            }
+        },
+
+        syncReferralStorage: () => {
+            let cookieData = null;
+            let localData = null;
+            try {
+                const cookieMatch = document.cookie.match(new RegExp('(^| )' + utils.REFERRAL_KEY + '=([^;]+)'));
+                if (cookieMatch) {
+                    cookieData = JSON.parse(decodeURIComponent(cookieMatch[2]));
+                }
+            } catch (err) {}
+            try {
+                localData = JSON.parse(localStorage.getItem(utils.REFERRAL_KEY));
+            } catch (err) {}
+            if (cookieData && !localData) {
+                localStorage.setItem(utils.REFERRAL_KEY, JSON.stringify(cookieData));
+            } else if (!cookieData && localData) {
+                const maxAge = utils.COOKIE_MAX_AGE;
+                document.cookie = `${utils.REFERRAL_KEY}=${encodeURIComponent(JSON.stringify(localData))}; path=/; max-age=${maxAge}; SameSite=Lax`;
+                if (window.location.protocol === 'https:') {
+                    document.cookie += '; Secure';
+                }
+            }
+        },
+
         log: (message = '') => {
             if (config.debug) {
                 console.log(`[MarketIn SDK] ${message}`);
@@ -78,6 +143,9 @@
             if (!config.sessionId) {
                 config.sessionId = utils.generateUUID();
             }
+
+            // Sync referral storage for consistency
+            utils.syncReferralStorage();
 
             // Check for affiliate + campaign + product IDs in URL
             // New short params (preferred): aid, cid, pid
@@ -168,6 +236,13 @@
                 // Update config context
                 config.affiliateId = config.affiliateId || affiliateId;
                 config.campaignId = config.campaignId || campaignId;
+
+                // Store referral data in both cookie and localStorage
+                utils.saveReferralParams({
+                    affiliateId: config.affiliateId,
+                    campaignId: config.campaignId,
+                    timestamp: Date.now()
+                });
 
                 // Generate or reuse a clickId for idempotency (URL -> cookie -> UUID)
                 const existingCookieClickId = utils.getCookie('mi_click');
@@ -345,6 +420,14 @@
                         delete sanitized.product_id;
                         delete sanitized.affiliate_id;
                         delete sanitized.campaign_id;
+                        // Auto-attach referral data if missing
+                        if (!sanitized.affiliateId || !sanitized.campaignId) {
+                            try {
+                                const referral = utils.getReferralParams();
+                                if (!sanitized.affiliateId && referral.affiliateId) sanitized.affiliateId = referral.affiliateId;
+                                if (!sanitized.campaignId && referral.campaignId) sanitized.campaignId = referral.campaignId;
+                            } catch (e) {}
+                        }
                         return sanitized;
                     });
                 };
@@ -398,7 +481,13 @@
                 sessionId: config.sessionId,
                 initialized: !!config.sessionId
             };
-        }
+        },
+
+        // Referral storage utilities (exposed for advanced use)
+        saveReferralParams: utils.saveReferralParams,
+        getReferralParams: utils.getReferralParams,
+        clearReferralParams: utils.clearReferralParams,
+        syncReferralStorage: utils.syncReferralStorage
     };
 
     // Expose SDK to window object
