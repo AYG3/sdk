@@ -135,6 +135,23 @@
             if (options.brandId) {
                 config.brandId = options.brandId;
             }
+
+            // Handle referral params passed from server-side (e.g., WordPress)
+            if (options.referralParams) {
+                utils.saveReferralParams(options.referralParams);
+                if (options.referralParams.affiliateId) {
+                    config.affiliateId = options.referralParams.affiliateId;
+                }
+                if (options.referralParams.campaignId) {
+                    config.campaignId = options.referralParams.campaignId;
+                }
+                if (options.referralParams.productId) {
+                    config.productId = options.referralParams.productId;
+                }
+                if (options.referralParams.clickId) {
+                    config.clickId = options.referralParams.clickId;
+                }
+            }
             
             // Generate session ID if not provided
             if (!config.sessionId) {
