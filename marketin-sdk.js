@@ -62,9 +62,6 @@
             try {
                 const maxAge = utils.COOKIE_MAX_AGE;
                 document.cookie = `${utils.REFERRAL_KEY}=${encodeURIComponent(encoded)}; path=/; max-age=${maxAge}; SameSite=Lax`;
-                if (window.location.protocol === 'https:') {
-                    document.cookie += '; Secure';
-                }
                 localStorage.setItem(utils.REFERRAL_KEY, encoded);
             } catch (err) {
                 utils.log('Failed to save referral params: ' + err.message);
@@ -217,8 +214,8 @@
          * Optional:
          * - productId: string|number
          * - clickId: string (idempotency key if available)
-         * - referrer: string (defaults to document.referrer)
-         * - landingUrl: string (defaults to window.location.href)
+         * - referrer: string (default document.referrer)
+         * - landingUrl: string (default window.location.href)
          * - timestamp: string ISO (default now)
          * - userAgent: string (default navigator.userAgent)
          */
@@ -422,11 +419,13 @@
                         delete sanitized.campaign_id;
                         // Auto-attach referral data if missing
                         if (!sanitized.affiliateId || !sanitized.campaignId) {
-                            try {
-                                const referral = utils.getReferralParams();
-                                if (!sanitized.affiliateId && referral.affiliateId) sanitized.affiliateId = referral.affiliateId;
-                                if (!sanitized.campaignId && referral.campaignId) sanitized.campaignId = referral.campaignId;
-                            } catch (e) {}
+                            const stored = utils.getReferralParams();
+                            if (stored.affiliateId && !sanitized.affiliateId) {
+                                sanitized.affiliateId = stored.affiliateId;
+                            }
+                            if (stored.campaignId && !sanitized.campaignId) {
+                                sanitized.campaignId = stored.campaignId;
+                            }
                         }
                         return sanitized;
                     });
