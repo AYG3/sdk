@@ -109,10 +109,11 @@
                 localStorage.setItem(utils.REFERRAL_KEY, JSON.stringify(cookieData));
             } else if (!cookieData && localData) {
                 const maxAge = utils.COOKIE_MAX_AGE;
-                document.cookie = `${utils.REFERRAL_KEY}=${encodeURIComponent(JSON.stringify(localData))}; path=/; max-age=${maxAge}; SameSite=Lax`;
+                let cookie = `${utils.REFERRAL_KEY}=${encodeURIComponent(JSON.stringify(localData))}; path=/; max-age=${maxAge}; SameSite=Lax`;
                 if (window.location.protocol === 'https:') {
-                    document.cookie += '; Secure';
+                    cookie += '; Secure';
                 }
+                document.cookie = cookie;
             }
         },
 
@@ -323,8 +324,6 @@
                 .catch(error => {
                     utils.log(`API Error: ${error.message}`);
                 });
-                
-                console.log("Marketin Server SDK API Success:", response);
             } catch (error) {
                 utils.log(`Failed to send API request: ${error.message}`);
             }
